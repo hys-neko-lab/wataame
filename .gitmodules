@@ -1,0 +1,28 @@
+[submodule "wataame-rpc"]
+	path = wataame-rpc
+	url = https://github.com/hys-neko-lab/wataame-rpc.git
+	branch = main
+[submodule "wataame-dashboard"]
+	path = wataame-dashboard
+	url = https://github.com/hys-neko-lab/wataame-dashboard.git
+	branch = main
+[submodule "wataame-network"]
+	path = wataame-network
+	url = https://github.com/hys-neko-lab/wataame-network.git
+	branch = main
+[submodule "wataame-compute"]
+	path = wataame-compute
+	url = https://github.com/hys-neko-lab/wataame-compute.git
+	branch = main
+[submodule "wataame-container"]
+	path = wataame-container
+	url = https://github.com/hys-neko-lab/wataame-container.git
+	branch = main
+[submodule "wataame-serverless"]
+	path = wataame-serverless
+	url = https://github.com/hys-neko-lab/wataame-serverless.git
+	branch = main
+[submodule "wataame-storage"]
+	path = wataame-storage
+	url = https://github.com/hys-neko-lab/wataame-storage.git
+	branch = main
