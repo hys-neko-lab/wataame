@@ -1,5 +1,7 @@
 ### USE FOR LEARNING ONLY
 
+技術書典13 「Pythonで作るおうちクラウドコンピューティング」用リポジトリ。
+
 実運用は非推奨です。
 
 # 動作環境
@@ -150,7 +152,7 @@ https://docs.docker.com/registry/deploying/
 $ docker run -d -p 5000:5000 --restart=always --name registry registry:2
 ```
 
-## watame-dashboard
+## for watame-dashboard
 wataame-dashboard/README.md を参照してください。
 
 その後、データベースに対してテーブルを自動生成します。
@@ -162,7 +164,7 @@ cd ../
 ./dbinit.sh
 ```
 
-## wataame-network
+## for wataame-network
 
 WataAmeに占有させるインタフェースがeth0、現在自動で割り当てられているIPが192.168.0.100/16の場合、次のようにIPアドレスを削除。
 
@@ -173,7 +175,7 @@ sudo ip addr del 192.168.0.100/16 dev eth0
 その後、wataame-network/README.mdに従ってブリッジを作成してください。
 
 
-## wataame-compute
+## for wataame-compute
 
 README.mdに従ってUbuntuイメージのセッティングをしてください。
 
@@ -200,7 +202,7 @@ $ cd ../
 $ ./run.sh
 ```
 
-ダッシュボードへのアクセスはhttp://127.0.0.1:5001です。
+ダッシュボードへのアクセスは http://127.0.0.1:5001 です。
 
 初めて使用するときはサインアップしてください。以降はサインインすることで使用できます。
 
@@ -220,7 +222,7 @@ Resource, Networkが作成済みであれば作成可能です。
 
 コンテナへのネットワークアクセスは一覧表示されたIPで可能です。
 
-# FaaSの作成
+### FaaSの作成
 
 Resourceが作成済みであれば作成可能です。
 
