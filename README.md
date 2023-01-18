@@ -1,8 +1,12 @@
 ### USE FOR LEARNING ONLY
 
-技術書典13 「Pythonで作るおうちクラウドコンピューティング」用リポジトリ。
+「Pythonで作るおうちクラウドコンピューティング」用リポジトリ。
 
 実運用は非推奨です。
+
+### 技術書典13頒布本の読者の方へ
+
+「TBF13」タグのついたコミットをご使用ください。
 
 # 動作環境
 
@@ -10,19 +14,19 @@ Ubuntu20.04、物理マシン上での動作を確認しています。
 
 ネットワークインタフェースは2つ以上用意してください。PCに元からあるNIC+USB-Ethernetアダプタなどがおすすめです。後者をWataAmeで占有します。
 
-VirtualBox上の動作は確認できていません。neted VT-X/AMD-Vが有効になれば動くかもしれませんが、ネットワーク周りで沼る可能性大です。チャレンジする場合はネットワークインタフェースを2つ以上に設定してください。
-
 仮想マシンのサービスを動かせるかは以下で確認できます。
 
 ```
 $ kvm-ok
 ```
 
+なお、VirtualBox上での動作は確認できていません。neted VT-X/AMD-Vが有効になれば動くかもしれませんが、ネットワーク周りで沼る可能性大です。チャレンジする場合はネットワークインタフェースを2つ以上に設定してください。
+
 ## 主な依存ソフトウェア
 
  * Python3
  * Docker
- * Kubernetes
+ * Kubernetes(kind)
  * MySQL
  * Monaco Editor
 
@@ -34,23 +38,10 @@ $ kvm-ok
 $ git clone --recursive https://github.com/hys-neko-lab/wataame.git
 ```
 
-### Pythonパッケージ
+### システムセットアップ
 
 ```
-$ python3 -m pip install --upgrade pip
-$ pip3 install \
-grpcio grpcio-tools \
-flask flask-sqlalchemy flask-migrate \
-flask-wtf email-validator flask-login PyMySQL \
-ipget docker kubernetes 
-```
-
-### apt
-
-```
-$ sudo apt install \
-libvirt-clients virtinst qemu-system libvirt-daemon-system \
-mysql-server mysql-client python3-mysqldb
+$ ./setup/setup_wataame.sh
 # 実行後、libvirtdへのアクセス権限を有効にするため再起動してください
 ```
 
@@ -82,77 +73,20 @@ sudoなし実行のため次のコマンドを実行後、システムを再起�
 $ sudo usermod -aG docker $USER
 ```
 
-### Kubernetes
+### Kubernetes(kind)
 
 インストール方法は公式ページを参照してください
 
-https://kubernetes.io/ja/docs/setup/production-environment/tools/kubeadm/install-kubeadm/#kubeadm-kubelet-kubectl%E3%81%AE%E3%82%A4%E3%83%B3%E3%82%B9%E3%83%88%E3%83%BC%E3%83%AB
+https://kind.sigs.k8s.io/docs/user/quick-start/#installation
 
-スワップを切らないと動作しません。設定を永続化する場合は適宜ググってください。
-
-```
-$ sudo swapoff -a
-```
-
-インストール時のメッセージ通り設定
+インストール完了後、次のコマンドでシェルスクリプトを実行してください
 
 ```
-$ mkdir -p $HOME/.kube
-$ sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-$ sudo chown $(id -u):$(id -g) $HOME/.kube/config
-```
-
-flannelをインストール
-
-```
-$ sudo sysctl net.bridge.bridge-nf-call-iptables=1
-$ kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
-```
-
-コントロールプレーン上でポッドを動作させるためTaintsを切る
-
-```
-$ kubectl describe node main | grep Taints
-Taints:             node-role.kubernetes.io/control-plane:NoSchedule
-# if you get NoSchedule, remove Taints
-$ kubectl taint nodes --all node-role.kubernetes.io/control-plane-
-```
-
-metrics-serverのインストール
-
-そのままだと接続できない事象が起きたのでcomponents.yamlを編集して適用
-
-```
-$ kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
-
-# metrics-server setting
-$ wget https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
-$ vi components.yaml
-(省略)
-    spec:
-      containers:
-      - args:
-        - --cert-dir=/tmp
-        - --secure-port=4443
-        - --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname
-        - --kubelet-use-node-status-port
-        - --kubelet-insecure-tls ### これを追記 ###
-        - --metric-resolution=15s
-        image: k8s.gcr.io/metrics-server/metrics-server:v0.6.1
-$ kubectl apply -f components.yaml
-```
-
-dockerプライベートレジストリの起動
-
-wataame-serverlessはプライベートレジストリにイメージをpushするため。
-
-https://docs.docker.com/registry/deploying/
-
-```
-$ docker run -d -p 5000:5000 --restart=always --name registry registry:2
+$ ./setup/setup_kind.sh
 ```
 
 ## for watame-dashboard
+
 wataame-dashboard/README.md を参照してください。
 
 その後、データベースに対してテーブルを自動生成します。
@@ -222,8 +156,15 @@ Resource, Networkが作成済みであれば作成可能です。
 
 コンテナへのネットワークアクセスは一覧表示されたIPで可能です。
 
-### FaaSの作成
+### サーバーレスアプリケーションの作成
 
 Resourceが作成済みであれば作成可能です。
 
-FaaSへのJSONリクエストは、WataAmeを実行しているホストの「占有させていない方」のIPアドレスに対して、一覧表示されているポートから可能です。
+作成したサーバーレスアプリケーションへのJSONリクエストは、WataAmeを実行しているホストの「占有させていない方」のIPアドレスに対して下記のように投げることができます。
+
+```
+# ホストIP=192.168.0.100、アプリ名「myfunc」の場合
+$ curl -X POST \
+-H "Content-Type: application/json" \
+-d '{"hello":"world"}' http://192.168.0.100/serverless/myfunc
+```
