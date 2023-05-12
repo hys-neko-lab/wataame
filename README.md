@@ -1,8 +1,14 @@
+# WataAme
+
+<p align="center">
+  <img src="docs/wataame128x128.png">
+</p>
+
+WataAmeはLAN内動作する、コンピューティング環境提供Webサービスです。
+
 ### USE FOR LEARNING ONLY
 
-「Pythonで作るおうちクラウドコンピューティング」用リポジトリ。
-
-実運用は非推奨です。
+「Pythonで作るおうちクラウドコンピューティング」用リポジトリです。実運用は非推奨です。
 
 ### 技術書典13頒布本の読者の方へ
 
